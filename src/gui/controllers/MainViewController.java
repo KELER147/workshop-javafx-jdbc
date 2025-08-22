@@ -1,4 +1,4 @@
-package gui;
+package gui.controllers;
 import application.Main;
 import gui.util.Alerts;
 import javafx.fxml.FXML;
@@ -35,7 +35,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     public void onMenuItemDepartmentAction() {
-        loadView("/gui/DepartmentList.fxml", (DepartmentListController controller) -> {
+        loadView("/gui/views/DepartmentList.fxml", (DepartmentListController controller) -> {
             controller.setDepartmentService(new DepartmentService());
             controller.updateTableView();
         });
@@ -43,7 +43,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     public void onMenuItemAboutAction() {
-        loadView("/gui/about.fxml", x -> {});
+        loadView("/gui/views/about.fxml", x -> {});
     }
 
     @Override

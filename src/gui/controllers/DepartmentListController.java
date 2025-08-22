@@ -1,4 +1,4 @@
-package gui;
+package gui.controllers;
 import application.Main;
 import gui.util.Alerts;
 import gui.util.Utils;
@@ -47,7 +47,7 @@ public class DepartmentListController implements Initializable {
     @FXML
     public void OnBtNewAction(ActionEvent event) {
         Stage parentStage = Utils.currentStage(event);
-        createDialogForm( parentStage,"/gui/DepartmentForm.fxml");
+        createDialogForm( parentStage, "/gui/views/DepartmentForm.fxml");
     }
 
     public void setDepartmentService(DepartmentService service) {
