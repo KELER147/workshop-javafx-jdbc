@@ -3,10 +3,11 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class Department implements Serializable {
-
+    //Attributes
     private Integer id;
     private String name;
 
+    //Constructors
     public Department() {
     }
     public Department(Integer id, String name) {
@@ -14,19 +15,8 @@ public class Department implements Serializable {
         this.name = name;
     }
 
-    public Integer getId() {
-        return id;
-    }
-    public void setId(Integer id) {
-        this.id = id;
-    }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    //Methods
+    //->Equals and HashCode
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -39,8 +29,30 @@ public class Department implements Serializable {
         return Objects.hashCode(id);
     }
 
+
+    //->ToString
     @Override
     public String toString() {
-        return "Department [id: " + id + ", name: " + name + "]";
+        return "Department [" +
+                "id: " + id +
+                ", name: " + name +
+                "]";
+    }
+
+    //Getters and Setters
+    //->Id
+    public Integer getId() {
+        return id;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    //->Name
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
 }
