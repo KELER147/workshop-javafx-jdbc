@@ -1,5 +1,6 @@
 package gui.controllers;
 import db.DbException;
+import gui.Listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
@@ -14,12 +15,15 @@ import model.entities.Department;
 import model.services.DepartmentService;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class DepartmentFormController implements Initializable {
 
     private Department entity;
     private DepartmentService service;
+    private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 
     @FXML
     private TextField txtId;
@@ -47,19 +51,19 @@ public class DepartmentFormController implements Initializable {
         try {
             entity = getFormData();
             service.saveOrUpdate(entity);
+            notifyDataChangeListeners();
             Utils.currentStage(event).close();
             Alerts.showAlert("Object saved successfully!", null, "New Department \n ID: " + entity.getId() + "\n Name: " + entity.getName() + "\n saved successfully!", Alert.AlertType.INFORMATION);
-
         } catch (DbException e) {
             Alerts.showAlert("Error save object", null, e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
-
     @FXML
     public void onBtCancelAction(ActionEvent event) {
         Utils.currentStage(event).close();
     }
+
 
     private Department getFormData() {
         Department obj = new Department();
@@ -70,9 +74,14 @@ public class DepartmentFormController implements Initializable {
         return obj;
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        initializeNodes();
+    private void notifyDataChangeListeners() {
+        for (DataChangeListener listener : dataChangeListeners) {
+            listener.onDataChanged();
+        }
+    }
+
+    public void subscribeDataChangeListener(DataChangeListener Listener) {
+        dataChangeListeners.add(Listener);
     }
 
     public void setDepartment(Department entity) {
@@ -95,5 +104,10 @@ public class DepartmentFormController implements Initializable {
         Constraints.setTextFieldInteger(txtId);
         Constraints.setTextFieldMaxLength(txtName, 30);
         Constraints.setTextFieldLetters(txtName);
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        initializeNodes();
     }
 }

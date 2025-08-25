@@ -1,5 +1,6 @@
 package gui.controllers;
 import application.Main;
+import gui.Listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
 import javafx.collections.FXCollections;
@@ -24,9 +25,10 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class DepartmentListController implements Initializable {
+public class DepartmentListController implements Initializable, DataChangeListener {
 
     private DepartmentService service;
+
 
     @FXML
     private TableView<Department> tableViewDepartment;
@@ -42,7 +44,6 @@ public class DepartmentListController implements Initializable {
 
     private ObservableList<Department> obsList;
 
-
     @FXML
     public void OnBtNewAction(ActionEvent event) {
         Stage parentStage = Utils.currentStage(event);
@@ -50,9 +51,6 @@ public class DepartmentListController implements Initializable {
         createDialogForm(parentStage, "/gui/views/DepartmentForm.fxml", obj);
     }
 
-    public void setDepartmentService(DepartmentService service) {
-        this.service = service;
-    }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -67,6 +65,11 @@ public class DepartmentListController implements Initializable {
         tableViewDepartment.prefHeightProperty().bind(stage.heightProperty());
     }
 
+    @Override
+    public void onDataChanged() {
+        updateTableView();
+    }
+
     public void updateTableView() {
         if (service == null) {
             throw new IllegalStateException("Service was null");
@@ -74,6 +77,10 @@ public class DepartmentListController implements Initializable {
         List<Department> list = service.findAll();
         obsList = FXCollections.observableList(list);
         tableViewDepartment.setItems(obsList);
+    }
+
+    public void setDepartmentService(DepartmentService service) {
+        this.service = service;
     }
 
     private void createDialogForm(Stage parentStage, String absoluteName,  Department obj) {
@@ -84,6 +91,7 @@ public class DepartmentListController implements Initializable {
             DepartmentFormController controller = loader.getController();
             controller.setDepartment(obj);
             controller.setDepartmentService(new DepartmentService());
+            controller.subscribeDataChangeListener(this);
             controller.updateFormData();
 
             Stage dialogStage = new Stage();
