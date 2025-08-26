@@ -1,0 +1,169 @@
+package gui.controllers;
+import application.Main;
+import db.DbIntegrityException;
+import gui.Listeners.DataChangeListener;
+import gui.util.Alerts;
+import gui.util.Utils;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
+import model.entities.Seller;
+import model.services.SellerService;
+
+import java.net.URL;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
+
+public class SellerListController implements Initializable, DataChangeListener {
+
+    private SellerService service;
+    private ObservableList<Seller> obsList;
+
+    @FXML
+    private TableView<Seller> tableViewSeller;
+
+    @FXML
+    private TableColumn<Seller, Integer> tableColumnId;
+
+    @FXML
+    private TableColumn<Seller, String> tableColumnName;
+
+    @FXML
+    private TableColumn<Seller, Seller> tableColumnEDIT;
+
+    @FXML
+    private TableColumn<Seller, Seller> tableColumnREMOVE;
+
+    @FXML
+    private Button btNew;
+
+    @FXML
+    public void OnBtNewAction(ActionEvent event) {
+        Stage parentStage = Utils.currentStage(event);
+        Seller obj = new Seller();
+        createDialogForm(parentStage, "/gui/views/SellerForm.fxml", obj);
+    }
+
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        initializeNodes();
+    }
+
+    private void initializeNodes() {
+        tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        Stage stage = (Stage) Main.getMainScene().getWindow();
+        tableViewSeller.prefHeightProperty().bind(stage.heightProperty());
+    }
+
+    @Override
+    public void onDataChanged() {
+        updateTableView();
+    }
+
+    public void updateTableView() {
+        if (service == null) {
+            throw new IllegalStateException("Service was null");
+        }
+        List<Seller> list = service.findAll();
+        obsList = FXCollections.observableList(list);
+        tableViewSeller.setItems(obsList);
+        initEditButtons();
+        initRemoveButtons();
+    }
+
+    public void setSellerService(SellerService service) {
+        this.service = service;
+    }
+
+    private void createDialogForm(Stage parentStage, String absoluteName,  Seller obj) {
+//        try {
+//            FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
+//            Pane pane = loader.load();
+//
+//            SellerFormController controller = loader.getController();
+//            controller.setSeller(obj);
+//            controller.setSellerService(new SellerService());
+//            controller.subscribeDataChangeListener(this);
+//            controller.updateFormData();
+//
+//            Stage dialogStage = new Stage();
+//            dialogStage.setTitle("Enter Seller Data");
+//            dialogStage.setScene(new Scene(pane));
+//            dialogStage.setResizable(false);
+//            dialogStage.initOwner(parentStage);
+//            dialogStage.initModality(Modality.WINDOW_MODAL);
+//            dialogStage.showAndWait();
+//
+//        } catch (IOException e) {
+//            Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), Alert.AlertType.ERROR);
+//        }
+    }
+
+    private void initEditButtons() {
+        tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+        tableColumnEDIT.setCellFactory(param -> new TableCell<Seller, Seller>() {
+            private final Button button = new Button("edit");
+
+            @Override
+            protected void updateItem(Seller obj, boolean empty) {
+                super.updateItem(obj, empty);
+
+                if (obj == null) {
+                    setGraphic(null);
+                    return;
+                }
+
+                setGraphic(button);
+                button.setOnAction(
+                        event -> createDialogForm(
+                                Utils.currentStage(event), "/gui/views/SellerForm.fxml", obj));
+            }
+        });
+    }
+
+    private void initRemoveButtons() {
+        tableColumnREMOVE.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+        tableColumnREMOVE.setCellFactory(param -> new TableCell<Seller, Seller>() {
+            private final Button button = new Button("remove");
+
+            @Override
+            protected void updateItem(Seller obj, boolean empty) {
+                super.updateItem(obj, empty);
+
+                if (obj == null) {
+                    setGraphic(null);
+                    return;
+                }
+
+                setGraphic(button);
+                button.setOnAction(event -> removeEntity(obj));
+            }
+        });
+    }
+
+    private void removeEntity(Seller obj) {
+        Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure to delete?");
+
+        if (result.get() == ButtonType.OK) {
+            if (service == null) {
+                throw new IllegalStateException("Service was null");
+            }
+            try {
+                service.remove(obj);
+                updateTableView();
+            } catch (DbIntegrityException e) {
+                Alerts.showAlert("Error removing Object", null, e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+}
