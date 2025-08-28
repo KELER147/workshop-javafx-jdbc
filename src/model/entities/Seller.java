@@ -1,6 +1,5 @@
 package model.entities;
 import java.io.Serializable;
-import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.Objects;
 
